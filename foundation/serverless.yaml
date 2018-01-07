@@ -1,0 +1,151 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: AWS Lambda Function that configures created Github repos
+Parameters:
+  AccountName:
+    Type: String
+    Description: Name of AWS Account
+  TagVendor:
+    Type: String
+    Description: Name of Vendor deploying this template.
+    Default: me
+  TagService:
+    Description: adobe/bootstrap/core/devops
+    Type: String
+    Default: core
+  TagEnvironment:
+    Description: dev/test/prod
+    Type: String
+    Default: prod
+  TagApplication:
+    Description: stash/bamboo/nexus/aem/ad/nat/openvpn/firewall/v_orch
+    Type: String
+    Default: github
+  TagOwner:
+    Description: email address of the owner
+    Type: String
+    Default: 'me@david-obrien.net'
+  TagAccountName:
+    Description: Which account is this stack deployed to?
+    Type: String
+    Default: ''
+Resources:
+  Api:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: dev
+      DefinitionBody:
+        swagger: 2.0
+        info:
+          title:
+            Ref: AWS::StackName
+        x-amazon-apigateway-request-validators:
+          full:
+            validateRequestBody: true
+            validateRequestParameters: true
+        x-amazon-apigateway-request-validator: full
+        paths:
+          "/github":
+            post:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ConfigureGithubBranch.Arn}/invocations
+                passthroughBehavior: "when_no_match"
+              x-amazon-apigateway-auth:
+                type: "none"
+              responses:
+                "200":
+                  description: Return unique ID plus input params
+  ConfigureGithubBranch:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: githubmanage::githubmanage.Functions::ConfigureGithubBranch
+      Runtime: dotnetcore1.0
+      CodeUri:
+        Bucket: mode2services
+        Key: publish.zip
+      MemorySize: 512
+      Timeout: 300
+      Role: null
+      Policies:
+        - AdministratorAccess
+      Events:
+        webhook:
+          Type: Api
+          Properties:
+            Path: /github
+            Method: post
+            RestApiId:
+              Ref: Api
+      Tags:
+        Name: !Sub "${TagService}-${TagApplication}-${TagEnvironment}-${TagOwner}"
+        Owner: !Ref TagOwner
+        Service: !Ref TagService
+        Environment: !Ref TagEnvironment
+        Application: !Ref TagApplication
+  ConfigureGithubRepo:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: githubmanage::githubmanage.Functions::ConfigureGithubRepo
+      Runtime: dotnetcore1.0
+      CodeUri:
+        Bucket: mode2services
+        Key: publish.zip
+      MemorySize: 512
+      Timeout: 300
+      Role: null
+      Policies:
+        - AdministratorAccess
+      Events:
+        webhook:
+          Type: Api
+          Properties:
+            Path: /github
+            Method: post
+            RestApiId:
+              Ref: Api
+      Tags:
+        Name: !Sub "${TagService}-${TagApplication}-${TagEnvironment}-${TagOwner}"
+        Owner: !Ref TagOwner
+        Service: !Ref TagService
+        Environment: !Ref TagEnvironment
+        Application: !Ref TagApplication
+  StatesExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - !Sub "states.${AWS::Region}.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        - PolicyName: StatesExecutionPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "lambda:InvokeFunction"
+                Resource: "*"
+  StepFunction:
+    Type: "AWS::StepFunctions::StateMachine"
+    Properties:
+      DefinitionString: |-
+        {
+          "Comment": "A Hello World example of the Amazon States Language using a Pass state",
+          "StartAt": "HelloWorld",
+          "States": {
+            "HelloWorld": {
+              "Type": "Pass",
+              "Result": "Hello World!",
+              "End": true
+            }
+          }
+        }
+      RoleArn: !GetAtt [ StatesExecutionRole, Arn ]
