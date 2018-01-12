@@ -43,7 +43,7 @@ Parameters:
     Description: Which account is this stack deployed to?
     Type: String
     Default: ''
-Description: Stack for CodePipeline and CodeBuild to deploy an Office 365 log forwarder to splunk
+Description: Stack for CodePipeline and CodeBuild to deploy a Lambda and Step Function stack to configure github repos
 Resources:
     # CodeBuild project and resources (S3 Bucket for build artifacts, Role, Project)s
   BuildArtifactsBucket:

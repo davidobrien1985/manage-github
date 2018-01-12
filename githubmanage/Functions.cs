@@ -51,6 +51,31 @@ namespace githubmanage
 
     }
 
+    public APIGatewayProxyResponse CreateMasterBranch(APIGatewayProxyRequest request, ILambdaContext context)
+    {
+      context.Logger.LogLine($"Function started executing at {DateTime.UtcNow}");
+      context.Logger.LogLine("Function name: " + context.FunctionName);
+      context.Logger.LogLine("RemainingTime: " + context.RemainingTime);
+
+      string githubPat = Environment.GetEnvironmentVariable("githubPat");
+      string githubBaseApiUri = "https://api.github.com";
+
+      JObject requestBody = JObject.Parse(request.Body);
+
+      string repoName = (requestBody["repository"]["name"]).Value<string>();
+      string orgName = (requestBody["repository"]["owner"]["login"]).Value<string>();
+
+      context.Logger.LogLine($"Executing against repo {repoName} and org {orgName}...");
+      context.Logger.LogLine("Configuring Repository...");
+      var repoConfigResult = Helper.CreateMasterBranch(githubBaseApiUri, orgName, repoName, githubPat, context);
+      context.Logger.LogLine(repoConfigResult.ToString());
+
+      var response = CreateApiGatewayProxyResponse($"Repository {repoName} successfully initialised with master branch...");
+
+      return response;
+
+    }
+
     public APIGatewayProxyResponse ConfigureGithubBranch(APIGatewayProxyRequest request, ILambdaContext context)
     {
       context.Logger.LogLine($"Function started executing at {DateTime.UtcNow}");

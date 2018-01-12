@@ -58,6 +58,33 @@ Resources:
               responses:
                 "200":
                   description: Return unique ID plus input params
+  CreateGithubBranches:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: githubmanage::githubmanage.Functions::CreateGithubBranches
+      Runtime: dotnetcore1.0
+      CodeUri:
+        Bucket: mode2services
+        Key: publish.zip
+      MemorySize: 512
+      Timeout: 300
+      Role: null
+      Policies:
+        - AdministratorAccess
+      Events:
+        webhook:
+          Type: Api
+          Properties:
+            Path: /github
+            Method: post
+            RestApiId:
+              Ref: Api
+      Tags:
+        Name: !Sub "${TagService}-${TagApplication}-${TagEnvironment}-${TagOwner}"
+        Owner: !Ref TagOwner
+        Service: !Ref TagService
+        Environment: !Ref TagEnvironment
+        Application: !Ref TagApplication
   ConfigureGithubBranch:
     Type: AWS::Serverless::Function
     Properties:
@@ -136,16 +163,33 @@ Resources:
   StepFunction:
     Type: "AWS::StepFunctions::StateMachine"
     Properties:
-      DefinitionString: |-
-        {
-          "Comment": "A Hello World example of the Amazon States Language using a Pass state",
-          "StartAt": "HelloWorld",
-          "States": {
-            "HelloWorld": {
-              "Type": "Pass",
-              "Result": "Hello World!",
-              "End": true
+      DefinitionString: !Sub
+          - |
+            {
+              "Comment": "Deployment function for ${EnvironmentName}",
+              "StartAt": "wait_for_deployment_time",
+              "States": {
+                "create_master_and_dev_branch": {
+                  "Type": "Task",
+                  "Resource": "${create_master_and_dev_branch_arn}",
+                  "Next": "configure_repo_merge_options"
+                },
+                "configure_repo_merge_options": {
+                  "Type": "Task",
+                  "Resource": "${configure_repo_merge_options_arn}",
+                  "Next": "get_asg_details"
+                },
+                "configure_branch_protection": {
+                  "Type": "Task",
+                  "Resource": "${configure_branch_protection_arn}",
+                  "Next": "get_asg_details"
+                },
+              }
             }
-          }
-        }
+          - create_master_and_dev_branch_arn: 
+            !GetAtt [ CreateGithubBranches, Arn ] 
+          - configure_repo_merge_options_arn: 
+            !GetAtt [ ConfigureGithubRepo, Arn ] 
+          - configure_branch_protection_arn: 
+            !GetAtt [ ConfigureGithubBranch, Arn ] 
       RoleArn: !GetAtt [ StatesExecutionRole, Arn ]
