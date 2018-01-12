@@ -58,10 +58,10 @@ Resources:
               responses:
                 "200":
                   description: Return unique ID plus input params
-  CreateGithubBranches:
+  CreateMasterBranch:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: githubmanage::githubmanage.Functions::CreateGithubBranches
+      Handler: githubmanage::githubmanage.Functions::CreateMasterBranch
       Runtime: dotnetcore1.0
       CodeUri:
         Bucket: mode2services
