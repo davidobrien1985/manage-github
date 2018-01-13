@@ -170,6 +170,7 @@ Resources:
   DeploymentSM:
     Type: AWS::StepFunctions::StateMachine
     Properties:
+      RoleArn: !GetAtt [ StatesExecutionRole, Arn ]
       StateMachineName:
         !Sub "${TagAccountName}-github-repo-configurator"
       DefinitionString: !Sub
@@ -186,11 +187,14 @@ Resources:
               "create_github_master_branch": {
                 "Type": "Task",
                 "Resource": "${create_github_master_branch_arn}",
+                "ResultPath": "$.repo",
                 "Next": "configure_github_branch"
               },
               "configure_github_branch": {
                 "Type": "Task",
                 "Resource": "${create_github_master_branch_arn}",
+                "InputPath": "$.repo",
+                "ResultPath": "$.repo",
                 "Next": "finalise_deployment"
               },     
               "finalise_deployment": {
