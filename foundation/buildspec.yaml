@@ -17,7 +17,7 @@ phases:
       - dotnet publish
       - cd githubmanage/bin/Debug/netcoreapp1.1/publish/
       - zip ../../../../publish.zip *
-      - aws s3 cp ../../../../publish.zip s3://github-config-buildartifactsbucket-1k9ej6tuc8eg3/${CODEBUILD_RESOLVED_SOURCE_VERSION}/publish.zip
+      - aws s3 cp ../../../../publish.zip s3://${LAMBDA_OUTPUT_BUCKET}/${CODEBUILD_RESOLVED_SOURCE_VERSION}/publish.zip
   post_build:
     commands:
       - echo Build completed on `date`
