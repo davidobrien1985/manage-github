@@ -6,6 +6,12 @@ Parameters:
     Type: String
     Description: Name of AWS Account
     Default: root
+  ArtifactsBucket:
+    Type: String
+    Description: Name of S3 bucket
+  PathToArtifact:
+    Type: String
+    Description: Path to artifact on S3
   TagVendor:
     Type: String
     Description: Name of Vendor deploying this template.
@@ -65,8 +71,8 @@ Resources:
       Handler: githubmanage::githubmanage.Functions::CreateMasterBranch
       Runtime: dotnetcore1.0
       CodeUri:
-        Bucket: mode2services
-        Key: publish.zip
+        Bucket: !Ref ArtifactsBucket
+        Key: !Ref PathToArtifact
       MemorySize: 512
       Timeout: 300
       Role: null
@@ -92,8 +98,8 @@ Resources:
       Handler: githubmanage::githubmanage.Functions::ConfigureGithubBranch
       Runtime: dotnetcore1.0
       CodeUri:
-        Bucket: mode2services
-        Key: publish.zip
+        Bucket: !Ref ArtifactsBucket
+        Key: !Ref PathToArtifact
       MemorySize: 512
       Timeout: 300
       Role: null
@@ -119,8 +125,8 @@ Resources:
       Handler: githubmanage::githubmanage.Functions::ConfigureGithubRepo
       Runtime: dotnetcore1.0
       CodeUri:
-        Bucket: mode2services
-        Key: publish.zip
+        Bucket: !Ref ArtifactsBucket
+        Key: !Ref PathToArtifact
       MemorySize: 512
       Timeout: 300
       Role: null
