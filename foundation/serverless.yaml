@@ -167,3 +167,40 @@ Resources:
                 Action:
                   - "lambda:InvokeFunction"
                 Resource: "*"
+  DeploymentSM:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName:
+        !Sub "${TagAccountName}-github-repo-configurator
+      DefinitionString: !Sub
+        - |
+          {
+            "Comment": "github-repo-configurator",
+            "StartAt": "wait_for_deployment_time",
+            "States": {
+              "wait_for_deployment_time" : {
+                "Type": "Wait",
+                "TimestampPath": "$.deployment_time",
+                "Next": "create_github_master_branch"
+              },
+              "create_github_master_branch": {
+                "Type": "Task",
+                "Resource": "${create_github_master_branch_arn}",
+                "Next": "configure_github_branch"
+              },
+              "configure_github_branch": {
+                "Type": "Task",
+                "Resource": "${create_github_master_branch_arn}",
+                "Next": "finalise_deployment"
+              },     
+              "finalise_deployment": {
+                "Type": "Wait",
+                "Seconds": 1,
+                "End": true
+              }
+            }
+          }
+        - create_github_master_branch_arn: 
+            !GetAtt [ CreateMasterBranch, Arn ]
+          configure_github_branch_arn:
+            !GetAtt [ ConfigureGithubBranch, Arn ]
