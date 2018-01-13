@@ -5,6 +5,7 @@ Parameters:
   AccountName:
     Type: String
     Description: Name of AWS Account
+    Default: root
   TagVendor:
     Type: String
     Description: Name of Vendor deploying this template.
@@ -28,7 +29,7 @@ Parameters:
   TagAccountName:
     Description: Which account is this stack deployed to?
     Type: String
-    Default: ''
+    Default: root
 Resources:
   Api:
     Type: AWS::Serverless::Api

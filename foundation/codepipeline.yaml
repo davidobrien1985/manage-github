@@ -335,12 +335,7 @@ Resources:
                       Fn::Sub: |
                         {
                           "PathToArtifact": { "Fn::GetParam" : ["BuiltZip", "parameters.json", "PathToArtifact"]},
-                          "AccountName": { "Fn::GetParam" : ["BuiltZip", "parameters.json", "AccountName"]},
-                          "graphApiVersion": "1.6",
-                          "auditApiVersion": "beta",
-                          "clientId": "clientId",
-                          "tenantId": "tenantId",
-                          "clientSecret": "clientSecret"
+                          "AccountName": { "Fn::GetParam" : ["BuiltZip", "parameters.json", "AccountName"]}
                         }
                   InputArtifacts:
                     - Name: BuiltZip
