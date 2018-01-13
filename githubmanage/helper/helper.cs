@@ -38,7 +38,7 @@ namespace githubmanage.helper
     public static JObject CreateMasterBranch(string apiUri, string githubOrg, string repoName, string githubPat, ILambdaContext context)
     {
       string githubUri = $"{apiUri}/repos/{githubOrg}/{repoName}/contents/README.md";
-      string jsonPayload = "{\"message\":\"Creating README.md\", \"content\":\"SGVsbG8gd29ybGQgOmNhdDo = \", \"branch\":\"master\"}";
+      string jsonPayload = "{\"message\":\"Creating README.md\", \"content\":\"bXkgbmV3IGZpbGUgY29udGVudHM=\", \"committer\": {\"name\": \"AWS Lambda\", \"email\": \"me@david-obrien.net\"}, \"branch\":\"master\"}";
 
       context.Logger.LogLine("Building the httpClient...");
       HttpContent httpContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
