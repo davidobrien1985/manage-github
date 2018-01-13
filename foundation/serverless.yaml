@@ -6,7 +6,7 @@ Parameters:
     Type: String
     Description: Name of AWS Account
     Default: root
-  ArtifactsBucket:
+  LambdaArtifactsBucket:
     Type: String
     Description: Name of S3 bucket
   PathToArtifact:
@@ -71,7 +71,7 @@ Resources:
       Handler: githubmanage::githubmanage.Functions::CreateMasterBranch
       Runtime: dotnetcore1.0
       CodeUri:
-        Bucket: !Ref ArtifactsBucket
+        Bucket: !Ref LambdaArtifactsBucket
         Key: !Ref PathToArtifact
       MemorySize: 512
       Timeout: 300
@@ -98,7 +98,7 @@ Resources:
       Handler: githubmanage::githubmanage.Functions::ConfigureGithubBranch
       Runtime: dotnetcore1.0
       CodeUri:
-        Bucket: !Ref ArtifactsBucket
+        Bucket: !Ref LambdaArtifactsBucket
         Key: !Ref PathToArtifact
       MemorySize: 512
       Timeout: 300
@@ -125,7 +125,7 @@ Resources:
       Handler: githubmanage::githubmanage.Functions::ConfigureGithubRepo
       Runtime: dotnetcore1.0
       CodeUri:
-        Bucket: !Ref ArtifactsBucket
+        Bucket: !Ref LambdaArtifactsBucket
         Key: !Ref PathToArtifact
       MemorySize: 512
       Timeout: 300

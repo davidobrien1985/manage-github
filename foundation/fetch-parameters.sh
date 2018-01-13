@@ -4,6 +4,7 @@ cat <<EOF > parameters.json
 {
     "CommitHash": "${CODEBUILD_RESOLVED_SOURCE_VERSION}",
     "PathToArtifact": "${CODEBUILD_RESOLVED_SOURCE_VERSION}/publish.zip",
-    "AccountName": "${ACCOUNT_NAME}"
+    "AccountName": "${ACCOUNT_NAME}",
+    "LambdaArtifactsBucket": "${LAMBDA_OUTPUT_BUCKET}"
 }
 EOF

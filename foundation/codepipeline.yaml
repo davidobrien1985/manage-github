@@ -168,6 +168,9 @@ Resources:
           - Name: BUILD_OUTPUT_BUCKET
             Value:
               Ref: BuildArtifactsBucket
+          - Name: LAMBDA_OUTPUT_BUCKET
+            Value:
+              Ref: LambdaBucket
           - Name: ACCOUNT_NAME
             Value:
               Ref: TagAccountName
@@ -336,7 +339,7 @@ Resources:
                         {
                           "PathToArtifact": { "Fn::GetParam" : ["BuiltZip", "parameters.json", "PathToArtifact"]},
                           "AccountName": { "Fn::GetParam" : ["BuiltZip", "parameters.json", "AccountName"]},
-                          "ArtifactsBucket": !Ref ArtifactStore
+                          "LambdaArtifactsBucket": { "Fn::GetParam" : ["BuiltZip", "parameters.json", "LambdaArtifactsBucket"]} 
                         }
                   InputArtifacts:
                     - Name: BuiltZip
